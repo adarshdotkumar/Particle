@@ -1,0 +1,79 @@
+name: Release
+
+# Tagging is the whole publishing pipeline: jsDelivr serves the embed off this
+# repo's tree at the tag, and the single-file editor is attached here as a
+# one-click download for designers. See docs/RELEASING.md.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The pinned TAG in src/cdn.js is baked into every snippet the editor
+      # emits at this version. If it disagrees with the tag being pushed, the
+      # emitted URLs point at the wrong release — which breaks silently, weeks
+      # later, on somebody else's website. Fail here instead.
+      - name: Check src/cdn.js TAG matches the pushed tag
+        run: |
+          # Dynamic import, not require(): it works on any Node version,
+          # whereas require() of an ESM file needs a recent one.
+          PINNED=$(node --input-type=module -e "import('./src/cdn.js').then(m => console.log(m.TAG))")
+          PUSHED="${GITHUB_REF_NAME}"
+          echo "pinned in src/cdn.js: $PINNED"
+          echo "pushed git tag:       $PUSHED"
+          if [ "$PINNED" != "$PUSHED" ]; then
+            echo "::error::src/cdn.js TAG ($PINNED) does not match the pushed tag ($PUSHED). Bump it and re-tag."
+            exit 1
+          fi
+
+      - run: npm test
+
+      - run: npm run build:all
+
+      # dist/ is committed, so a build that changes it means the tag was cut
+      # from a stale dist — the exact case that serves broken bytes to live
+      # sites via jsDelivr.
+      - name: Check committed dist/ matches a fresh build
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::dist/ differs from a fresh build. Run npm run build:all, commit dist/, and re-tag."
+            git diff --stat -- dist
+            exit 1
+          fi
+
+      - name: Confirm the editor is self-contained
+        run: test -f dist-editor/particle-field-editor.html
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist-editor/particle-field-editor.html
+            dist/particle-field.min.js
+          body: |
+            ## For designers
+
+            Download **particle-field-editor.html** below, double-click it, and
+            make an effect. No installing — see
+            [docs/DESIGNERS.md](docs/DESIGNERS.md).
+
+            ## For developers
+
+            ```html
+            <script src="https://cdn.jsdelivr.net/gh/${{ github.repository }}@${{ github.ref_name }}/dist/particle-field.min.js" defer></script>
+            ```

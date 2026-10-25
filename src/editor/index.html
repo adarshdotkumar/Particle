@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>particle-field — design an effect, embed it anywhere</title>
+<link rel="stylesheet" href="./panel.css" />
+<link rel="stylesheet" href="./editor.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <div id="nav">
+    <span class="brand">Particle Field</span>
+    <span class="spacer"></span>
+    <div id="fps">&mdash;</div>
+    <label for="uploadInput">Load .json<input type="file" id="uploadInput" accept="application/json,.json" /></label>
+    <label class="wide" for="modelUploadInput">Upload a shape (.glb)<input type="file" id="modelUploadInput" accept=".glb,.gltf" /></label>
+    <!-- Running locally (npm run dev) only: write the shape into the code. -->
+    <button id="saveShapeBtn" type="button" hidden>Save as shape</button>
+    <button id="removeShapeBtn" type="button" hidden>Remove shape</button>
+    <button id="shareBtn" type="button">Copy link</button>
+    <button id="downloadBtn" type="button">Download</button>
+    <button id="resetBtn" type="button">Reset</button>
+  </div>
+
+  <div class="side" id="left">
+    <div class="panel-header">
+      <h2>Start from</h2>
+      <button class="panel-collapse" id="toggleLeft" title="Collapse this panel">‹</button>
+    </div>
+    <div class="panel-body">
+      <p class="sub">Tune it, then copy the embed code.</p>
+
+      <div class="group-label">Shape</div>
+      <div class="chips" id="shapes"></div>
+
+      <div class="group-label">Text</div>
+      <input type="text" id="shapeText" value="HELLO" maxlength="24"
+             placeholder="Type a letter or word" />
+
+      <div class="group-label">Presets</div>
+      <div class="presets" id="presets"></div>
+      <div class="preset-status" id="presetStatus" hidden>
+        <span class="name"></span>
+        <button class="revert" id="revertBtn" type="button" hidden>revert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- A container the engine fills with its own canvas, rather than being the
+       canvas itself. Same visual result; now it is just another embed. -->
+  <div id="stage"></div>
+
+  <div class="side" id="right">
+    <div class="panel-header">
+      <h2>Properties</h2>
+      <button class="panel-collapse" id="toggleRight" title="Collapse this panel">›</button>
+    </div>
+    <div class="panel-body">
+      <div class="group-label">Swirl origin</div>
+      <div class="origins" id="origins"></div>
+      <div class="origin-note" id="originNote">Everywhere — nothing selected</div>
+
+      <!-- headings for each bucket are emitted by the slider loop -->
+      <div id="sliders"></div>
+
+      <div class="group-label">Dot style</div>
+      <select id="dotStyle">
+        <option value="glow" selected>Glow — soft, adds up</option>
+        <option value="solid">Solid — hard, flat</option>
+      </select>
+
+      <div class="group-label">Colour</div>
+      <div class="swatches">
+        <label>Young<input type="color" id="colA" value="#9d8cff" /></label>
+        <label>Old<input type="color" id="colB" value="#4be3ff" /></label>
+      </div>
+
+      <div class="group-label">Particle count</div>
+      <select id="count">
+        <option value="64">4,096 — very light</option>
+        <option value="128">16,384 — default</option>
+        <option value="256" selected>65,536 — heavier</option>
+        <option value="512">262,144 — stress test</option>
+      </select>
+
+      <details id="embed">
+        <summary>Put this on your website</summary>
+
+        <p class="embed-help">
+          Copy this, then paste it into your page where you want the effect.
+          Not sure how? Send it to whoever built your site — it's one block of
+          ordinary HTML.
+        </p>
+
+        <div class="embed-opts">
+          <label>Placement
+            <select id="embedMode">
+              <option value="container" selected>In a container</option>
+              <option value="background">Fullscreen background</option>
+            </select>
+          </label>
+          <label>Height
+            <input type="number" id="embedHeight" value="600" min="120" max="4000" step="20" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="copyCodeBtn" class="wide primary" type="button">Copy code</button>
+        </div>
+
+        <div id="embedCode"></div>
+
+        <p class="embed-note embed-warn" id="embedShapeNote" hidden></p>
+
+        <p class="embed-note">
+          Works in every current browser. On very old devices the effect is skipped
+          and the rest of your page is unaffected.
+        </p>
+
+        <details id="embedDev">
+          <summary>For developers</summary>
+          <div class="flavors" id="embedFlavors"></div>
+          <div id="embedDevCode"></div>
+          <div class="actions">
+            <button id="copyDevBtn" class="wide" type="button">Copy</button>
+          </div>
+        </details>
+      </details>
+    </div>
+  </div>
+
+</div>
+
+<div id="hint">drag the sliders &middot; move cursor to disturb</div>
+
+<div id="unsupported">
+  <div>
+    <strong>This needs float textures.</strong><br />
+    Your browser or GPU doesn't support <code>EXT_color_buffer_float</code>,
+    which is where the particle positions are stored.<br />
+    Real sites ship a static image as a fallback here.
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module" src="./main.js"></script>
+</body>
+</html>

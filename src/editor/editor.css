@@ -1,0 +1,284 @@
+/* Additions and overrides on top of the original panel.css.
+   Kept separate so panel.css can stay a verbatim copy. */
+
+/* The original page was 3 screens tall only so there was something to scroll,
+   and scroll drove the assemble. The editor drives progress from its own
+   slider instead, so the page no longer needs to be scrollable. */
+body { height: 100vh; overflow: hidden; }
+
+/* ---------- shell: top nav, collapsible side panels, canvas in between ----------
+   Replaces the single floating #panel from panel.css with three regions the
+   canvas can never be covered by. Side panels collapse to a rail instead of
+   overlaying the canvas, so the effect is always fully visible. */
+:root {
+  --nav-h: 52px;
+  --side-w: 268px; /* matches panel.css's old #panel width */
+  --rail-w: 34px;
+}
+
+.shell {
+  position: fixed; inset: 0;
+  display: grid;
+  grid-template-columns: var(--side-w) 1fr var(--side-w);
+  grid-template-rows: var(--nav-h) 1fr;
+  grid-template-areas:
+    "nav  nav    nav"
+    "left stage  right";
+  transition: grid-template-columns 0.18s ease;
+}
+.shell.collapse-left  { grid-template-columns: var(--rail-w) 1fr var(--side-w); }
+.shell.collapse-right { grid-template-columns: var(--side-w) 1fr var(--rail-w); }
+.shell.collapse-left.collapse-right { grid-template-columns: var(--rail-w) 1fr var(--rail-w); }
+
+#nav {
+  grid-area: nav;
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 14px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--hairline);
+  z-index: 20;
+}
+#nav .brand {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+  text-transform: uppercase; margin-right: 10px; white-space: nowrap;
+}
+#nav .spacer { flex: 1; }
+#nav #fps {
+  margin: 0; padding: 0; border-top: none;
+  font-size: 10px; color: var(--ink-dim); font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+#nav button, #nav label {
+  padding: 6px 11px; font: inherit; font-size: 11px; white-space: nowrap;
+  color: var(--ink); background: rgba(255,255,255,0.06);
+  border: 1px solid var(--hairline); border-radius: 7px; cursor: pointer;
+}
+#nav button:hover, #nav label:hover { background: rgba(255,255,255,0.13); }
+#nav input[type="file"] { display: none; }
+
+/* #stage is now a grid item the engine fills with its own canvas, sized to
+   this box via ParticleField's 'container' mode — never the full viewport,
+   so it shrinks/grows correctly as the side panels collapse or expand. */
+#stage { grid-area: stage; position: relative; }
+
+.side {
+  overflow-y: auto; overflow-x: hidden;
+  padding: 14px 14px 20px;
+  background: var(--panel-bg);
+  min-width: 0;
+}
+#left  { grid-area: left;  border-right: 1px solid var(--hairline); }
+#right { grid-area: right; border-left: 1px solid var(--hairline); }
+
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.panel-header h2 {
+  margin: 0; font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--ink-dim);
+}
+.panel-collapse {
+  flex: none;
+  width: 22px; height: 22px; display: grid; place-content: center;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--hairline);
+  border-radius: 6px; cursor: pointer; color: var(--ink-dim); font-size: 11px;
+}
+.panel-collapse:hover { color: var(--ink); background: rgba(255,255,255,0.13); }
+
+/* Collapsed: hide the panel's body, leave only its header (now just the
+   toggle) visible in the rail. The rail is narrower than the panel's own
+   left+right padding, so that padding has to zero out too, or the toggle
+   clips against overflow-x: hidden. */
+.shell.collapse-left  #left,
+.shell.collapse-right #right { padding-left: 0; padding-right: 0; }
+.shell.collapse-left  #left  .panel-body,
+.shell.collapse-right #right .panel-body { display: none; }
+.shell.collapse-left  #left  .panel-header,
+.shell.collapse-right #right .panel-header { justify-content: center; margin-bottom: 0; }
+.shell.collapse-left  #left  .panel-header h2,
+.shell.collapse-right #right .panel-header h2 { display: none; }
+
+.side .sub { margin: 0 0 14px; font-size: 11px; color: var(--ink-dim); }
+.panel-body > .group-label:first-of-type { margin-top: 0; }
+
+/* ---------- slider buckets: collapsible instead of one flat wall ---------- */
+.bucket { border: 1px solid var(--hairline); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+.bucket > summary {
+  list-style: none; cursor: pointer; padding: 8px 10px;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-dim); display: flex; justify-content: space-between; align-items: center;
+}
+.bucket > summary::-webkit-details-marker { display: none; }
+.bucket > summary::after { content: '▸'; }
+.bucket[open] > summary::after { content: '▾'; }
+.bucket > summary:hover { color: var(--ink); }
+.bucket .row { padding: 0 10px; margin-top: 10px; }
+.bucket .row:last-child { margin-bottom: 10px; }
+
+/* ---------- preset status: which one, and a way back to it ---------- */
+.preset-status {
+  margin-top: 8px; display: flex; align-items: center; gap: 8px;
+  font-size: 10px; color: var(--ink-dim);
+}
+/* display: flex above beats the UA default for [hidden] (same specificity,
+   later in the cascade) — without this, setting .hidden = true in JS leaves
+   the last-shown preset name and revert link visibly stuck on screen. */
+.preset-status[hidden] { display: none; }
+.preset-status .name { color: var(--accent); }
+.preset-status .revert {
+  font: inherit; font-size: 10px; color: var(--accent);
+  background: none; border: none; padding: 0; cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ---------- actions: share / save / reset ---------- */
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.actions button, .actions label {
+  padding: 7px 4px;
+  font: inherit;
+  font-size: 11px;
+  text-align: center;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--hairline);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.actions button:hover, .actions label:hover { background: rgba(255, 255, 255, 0.13); }
+.actions button.ok { border-color: #4ade80; background: rgba(74, 222, 128, 0.2); }
+.actions .wide { grid-column: 1 / -1; }
+.actions input[type="file"] { display: none; }
+
+/* ---------- embed export ---------- */
+#embed { margin-top: 4px; }
+
+#embed summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  padding: 6px 0;
+}
+#embed summary::-webkit-details-marker { display: none; }
+#embed summary::before { content: '▸ '; }
+#embed[open] summary::before { content: '▾ '; }
+#embed summary:hover { color: var(--ink); }
+
+/* Instructions, not a label. This is the one bit of the panel that has to read
+   as a sentence to someone who has never seen an HTML tag. */
+.embed-help {
+  margin: 0 0 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-dim);
+}
+
+.embed-note {
+  margin: 8px 0 2px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--ink-dim);
+}
+
+/* A shape that won't come through the snippet unless you do one more thing. */
+.embed-warn { color: #ffd27a; }
+.embed-warn code { font-size: 10px; }
+
+/* The primary action. Deliberately louder than every other button in the
+   panel — it is the thing the whole tool exists to do. */
+.actions button.primary {
+  padding: 10px 4px;
+  font-weight: 600;
+  color: #0b0a14;
+  background: var(--ink);
+  border-color: transparent;
+}
+.actions button.primary:hover { background: #ffffff; }
+.actions button.primary.ok { color: var(--ink); }
+
+/* Developer variants, folded away so they cannot confuse anyone who does not
+   need them. */
+#embedDev { margin-top: 10px; border-top: 1px solid var(--hairline); }
+
+#embedDev summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 8px 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+#embedDev summary::-webkit-details-marker { display: none; }
+#embedDev summary::before { content: '▸ '; }
+#embedDev[open] summary::before { content: '▾ '; }
+#embedDev summary:hover { color: var(--ink); }
+
+.flavors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 8px; }
+.flavors button {
+  padding: 6px 2px;
+  font: inherit;
+  font-size: 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.flavors button.on { border-color: var(--accent); background: rgba(139, 125, 255, 0.3); }
+
+.embed-opts { display: grid; grid-template-columns: 1fr 72px; gap: 6px; align-items: end; }
+.embed-opts label { font-size: 10px; color: var(--ink-dim); }
+.embed-opts input[type="number"] {
+  width: 100%;
+  margin-top: 3px;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--hairline);
+  border-radius: 7px;
+  outline: none;
+}
+
+#embedCode, #embedDevCode {
+  max-height: 190px;
+  margin: 8px 0 6px;
+  padding: 9px 10px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  white-space: pre;
+  tab-size: 2;
+  color: #d6dbff;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+
+/* ---------- toast ---------- */
+#toast {
+  position: fixed;
+  left: 50%; bottom: 26px;
+  transform: translateX(-50%) translateY(8px);
+  padding: 9px 15px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: rgba(18, 18, 24, 0.94);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 30;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

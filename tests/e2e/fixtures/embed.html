@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>particle-field · embed fixture</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #06070c;
+    color: #e9ecff;
+    font: 16px/1.5 ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+  h1, h2 { font-weight: 650; letter-spacing: -0.02em; }
+  .field { height: 420px; margin: 32px 0; border: 1px solid #1e2340; border-radius: 12px; }
+  .overlay { position: relative; display: grid; place-items: center; height: 100%; }
+  .overlay h2 { margin: 0; font-size: 40px; mix-blend-mode: screen; }
+  .spacer { height: 150vh; display: grid; place-items: center; opacity: 0.4; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Two independent fields on one page</h1>
+  <p>The first is a sphere. Scroll down for a text field that starts offscreen.</p>
+
+  <!-- Field one: sphere, with host content layered on top to prove transparency -->
+  <div class="field" id="one" data-particle-field='{"shapeMode":"sphere","colA":"#9d8cff","colB":"#4be3ff"}'>
+    <div class="overlay"><h2>host content sits on top</h2></div>
+  </div>
+
+  <div class="spacer">↓ scroll ↓</div>
+
+  <!-- Field two: text, different colours, starts below the fold -->
+  <div class="field" id="two" data-particle-field='{"shapeMode":"text","shapeText":"WAVE","colA":"#ff9d5c","colB":"#fff4d6","spring":4.5,"size":0.014}'></div>
+
+  <!-- Control: same size, no effect. Used to calibrate "did it draw anything". -->
+  <div class="field" id="blank"></div>
+
+  <div class="spacer">end</div>
+</div>
+
+<script type="module">
+  import { mount } from '/src/index.js';
+  window.fields = mount();
+</script>
+</body>
+</html>

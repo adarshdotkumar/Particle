@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>particle-field · fullscreen background example</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #04050a;
+    color: #e9ecff;
+    font: 16px/1.6 ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  /* Background mode fixes the canvas to the viewport at z-index 0, so page
+     content just needs to sit above it. */
+  .content { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  section { min-height: 100vh; display: grid; place-content: center; }
+  h1 { font-size: clamp(36px, 7vw, 72px); font-weight: 660; letter-spacing: -0.035em; margin: 0 0 12px; }
+  p { opacity: 0.72; max-width: 54ch; }
+  .hint { font-size: 14px; opacity: 0.45; }
+</style>
+</head>
+<body>
+
+<!-- Background mode + scroll progress: this is the original demo's behaviour.
+     The shape is whole at the top of the page and comes apart as you scroll. -->
+<div data-particle-field='{
+       "mode": "background",
+       "progress": "scroll",
+       "shapeMode": "x",
+       "depth": 0.55,
+       "dotStyle": "solid",
+       "colA": "#ffffff", "colB": "#ffffff",
+       "flowStrength": 2, "flowFrequency": 0.5, "flowDrift": 0.2,
+       "flowInfluence": 0.5, "spring": 0.1, "lifeSpeed": 0.4,
+       "mouseRadius": 1, "mouseStrength": 3,
+       "size": 0.005, "glow": 1, "depthFade": 0,
+       "lightAngle": 135, "shadow": 0.7,
+       "reach": 0.75, "escape": 0.1, "streamSpeed": 1.1,
+       "count": 256
+     }'></div>
+<script src="../dist/particle-field.min.js" defer></script>
+
+<div class="content">
+  <section>
+    <h1>Fullscreen background</h1>
+    <p>The canvas is fixed to the viewport behind this text. Scroll down and the shape comes apart.</p>
+    <p class="hint">↓ keep scrolling</p>
+  </section>
+  <section>
+    <h1>Halfway</h1>
+    <p>Progress runs 1 → 0 with the page, reversed on purpose: formed at the top, dust at the bottom.</p>
+  </section>
+  <section>
+    <h1>Dust</h1>
+    <p>Scroll back up to reassemble it.</p>
+  </section>
+</div>
+</body>
+</html>
