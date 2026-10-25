@@ -1,0 +1,79 @@
+{
+  "name": "@adarshdotkumar/particle-field",
+  "version": "0.1.0",
+  "description": "GPU particle effects you can design in a browser and drop into a website.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adarshdotkumar/Particle.git"
+  },
+  "homepage": "https://github.com/adarshdotkumar/Particle#readme",
+  "bugs": {
+    "url": "https://github.com/adarshdotkumar/Particle/issues"
+  },
+  "main": "dist/particle-field.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:all": "vitest run && playwright test",
+    "build:lib": "vite build -c vite.lib.config.js && BUILD_TARGET=standalone vite build -c vite.lib.config.js && BUILD_TARGET=react vite build -c vite.lib.config.js",
+    "dev": "vite",
+    "build:editor": "vite build -c vite.editor.config.js && node scripts/rename-editor.mjs",
+    "build:all": "npm run build:lib && npm run build:editor",
+    "import-model": "node scripts/import-model.mjs"
+  },
+  "keywords": [
+    "particles",
+    "webgl",
+    "three",
+    "gpgpu",
+    "react",
+    "animation",
+    "embed"
+  ],
+  "author": "Adarsh Kumar",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@vitejs/plugin-react": "^4.7.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "three": "^0.170.0",
+    "vite": "^5.4.21",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^2.1.9"
+  },
+  "module": "dist/particle-field.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "!src/editor",
+    "types",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./dist/particle-field.js"
+    },
+    "./standalone": "./dist/particle-field.min.js",
+    "./react": {
+      "types": "./types/react.d.ts",
+      "default": "./dist/particle-field-react.js"
+    }
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "three": ">=0.170.0 <1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

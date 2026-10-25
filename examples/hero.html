@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>particle-field · hero example</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #05060b;
+    color: #e9ecff;
+    font: 16px/1.6 ui-sans-serif, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px 120px; }
+  nav { display: flex; gap: 24px; padding: 24px 0; font-size: 14px; opacity: 0.7; }
+
+  /* The only requirement: the container needs a height, because the canvas is
+     absolutely positioned inside it. */
+  .hero { height: 70vh; min-height: 420px; }
+
+  /* Host content layered over the effect. The canvas is transparent and has
+     pointer-events:none, so links inside still work. */
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: grid;
+    place-content: center;
+    text-align: center;
+  }
+  h1 {
+    margin: 0 0 12px;
+    font-size: clamp(40px, 8vw, 88px);
+    font-weight: 660;
+    letter-spacing: -0.035em;
+  }
+  .hero p { margin: 0; opacity: 0.72; }
+  h2 { margin: 64px 0 12px; font-weight: 640; letter-spacing: -0.02em; }
+  p  { max-width: 62ch; }
+  code {
+    background: #10142a; padding: 2px 6px; border-radius: 4px; font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><strong>particle-field</strong><span>hero example</span></nav>
+
+  <!-- ── This is exactly what the editor's HTML snippet gives you ──────── -->
+  <div class="hero"
+       data-particle-field='{
+         "shapeMode": "text",
+         "shapeText": "PARTICLES",
+         "spring": 4.5,
+         "flowStrength": 0.28,
+         "flowFrequency": 1.7,
+         "flowDrift": 0.35,
+         "lifeSpeed": 0.95,
+         "size": 0.014,
+         "glow": 0.62,
+         "colA": "#ffffff",
+         "colB": "#7ad7ff"
+       }'>
+    <div class="hero-inner">
+      <h1>Text sits on top</h1>
+      <p>The canvas is transparent and ignores the pointer.</p>
+    </div>
+  </div>
+  <script src="../dist/particle-field.min.js" defer></script>
+  <!-- ─────────────────────────────────────────────────────────────────── -->
+
+  <h2>Container mode</h2>
+  <p>
+    The effect is scoped to its <code>&lt;div&gt;</code>: it sizes to that box via a
+    <code>ResizeObserver</code>, tracks the cursor relative to that box, and pauses
+    itself when you scroll it out of view. Nothing here touches the window.
+  </p>
+
+  <h2>A second, independent field</h2>
+  <p>Different shape, different colours, its own simulation.</p>
+
+  <div style="height:340px"
+       data-particle-field='{"colA":"#ff5c8a","colB":"#5cffd4","flowStrength":2.4,"spring":0.3,"size":0.026,"glow":0.45,"depthFade":0.4}'></div>
+
+  <h2>Scroll-driven assembly</h2>
+  <p>
+    Pass <code>"progress": "scroll"</code> and the shape assembles as the element
+    crosses the middle of the viewport, then comes apart again as it leaves.
+  </p>
+
+  <div style="height:420px"
+       data-particle-field='{"progress":"scroll","shapeMode":"x","depth":0.55,"dotStyle":"solid","colA":"#ffffff","colB":"#ffffff","size":0.005,"glow":1,"depthFade":0,"flowStrength":2,"flowFrequency":0.5,"flowInfluence":0.5,"spring":0.1,"lifeSpeed":0.4,"reach":0.75,"mouseStrength":3,"mouseRadius":1,"shadow":0.7}'></div>
+
+  <p style="opacity:0.5">
+    Run <code>npm run build:lib</code> first — this page loads the real
+    <code>dist/particle-field.min.js</code>, three.js included, no import map.
+  </p>
+</div>
+</body>
+</html>

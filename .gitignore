@@ -1,0 +1,15 @@
+# dist/ IS committed on purpose. jsDelivr serves the embed straight off the repo
+# tree at each tag (cdn.jsdelivr.net/gh/<owner>/<repo>@<tag>/dist/...), not off
+# Release assets — so the built engine has to exist in the repo or every pasted
+# snippet 404s. three.js commits its build/ for the same reason.
+#
+# dist-editor/ is NOT committed: the single-file editor ships as a GitHub
+# Release asset, which is a nicer one-click download than a raw repo file.
+
+node_modules
+dist-editor
+test-results
+playwright-report
+
+# OS junk
+.DS_Store
